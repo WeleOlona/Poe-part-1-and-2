@@ -1,81 +1,115 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package com.mycompany.loginmain;
+package com.mycompany.loginpoe;
 
-/**
- *
- * @author lab_services_student
- */
- import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
- public class Login {
-  
+public class Login {
     
-   //store users details
-    private String registeredUsername;
-    private String registeredPassword;
+    private String storedUsername;
+    private String storedPassword;
+    private String storedCellNumber;
     private String firstName;
     private String lastName;
-
-    //ensure that the user name has an underscore and does not have more than 5 characters
-    public boolean checkUserName(String username) {
-        return username.contains("underscore(_)") && username.length() <= 5;
-    }
-
     
-   // must atleast have 8 characters,capital letter, ect 
+    public Login() {
+        this.storedUsername = "";
+        this.storedPassword = "";
+        this.storedCellNumber = "";
+        this.firstName = "";
+        this.lastName = "";
+    }
+    
+    public boolean checkUserName(String username) {
+        return username.contains("_") && username.length() <= 5;
+    }
+    
     public boolean checkPasswordComplexity(String password) {
-        String regex = "^(?=.*[0-9])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(password);
-        return matcher.matches();
-    }
-
-   
-    //needs to be of the right length and international code (South Africa strats with +27)
-    public boolean checkCellPhoneNumber(String cellNumber) {        
-        String regex = "^\\+27\\d{9}$";
-        return Pattern.matches(regex, cellNumber);
-    }
-
-   // Lays out the status message depending on the validation logic.
-    public String registerUser(String username, String password, String cell, String fName, String lName) {
-        if (!checkUserName(username)) {
-            return "Username is not correctly formatted; please ensure that your username contains an underscore and is no more than five characters in length.";
-        } 
+        boolean hasLength = password.length() >= 8;
+        boolean hasCapital = false;
+        boolean hasNumber = false;
+        boolean hasSpecial = false;
         
-        if (!checkPasswordComplexity(password)) {
+        for (int i = 0; i < password.length(); i++) {
+            char c = password.charAt(i);
+            if (Character.isUpperCase(c)) {
+                hasCapital = true;
+            }
+            if (Character.isDigit(c)) {
+                hasNumber = true;
+            }
+            if (!Character.isLetterOrDigit(c)) {
+                hasSpecial = true;
+            }
+        }
+        
+        return hasLength && hasCapital && hasNumber && hasSpecial;
+    }
+    
+ public boolean checkCellPhoneNumber(String cellNumber) {
+    if (cellNumber.startsWith("+27")) {
+        String numbersOnly = cellNumber.substring(3);
+        if (numbersOnly.length() == 9 || numbersOnly.length() == 10) {
+            return true;
+        }
+    }
+    return false;
+}
+    
+    public String registerUser(String username, String password, String cellNumber, 
+                               String fName, String lName) {
+        boolean validUsername = checkUserName(username);
+        boolean validPassword = checkPasswordComplexity(password);
+        boolean validCell = checkCellPhoneNumber(cellNumber);
+        
+        if (!validUsername) {
+            return "Username is not correctly formatted; please ensure that your username contains an underscore and is no more than five characters in length.";
+        }
+        
+        if (!validPassword) {
             return "Password is not correctly formatted; please ensure that the password contains at least eight characters, a capital letter, a number, and a special character.";
         }
-        this.registeredUsername = username;
-        this.registeredPassword = password;
+        
+        if (!validCell) {
+            return "Cell phone number incorrectly formatted or does not contain international code.";
+        }
+        
+        this.storedUsername = username;
+        this.storedPassword = password;
+        this.storedCellNumber = cellNumber;
         this.firstName = fName;
         this.lastName = lName;
         
-        return "Successfully captured Username and Password.";
+        return "User registered successfully.";
     }
-
-   
-    // Checks that entered details match the registered details.
-    public boolean loginUser(String enteredUser, String enteredPass) {
-        return enteredUser.equals(this.registeredUsername) && enteredPass.equals(this.registeredPassword);
+    
+    public boolean loginUser(String username, String password) {
+        return this.storedUsername.equals(username) && this.storedPassword.equals(password);
     }
-
-       // gives the success or failure message for the login attempt.
-    public String returnLoginStatus(boolean isLoggedIn) {
-        if (isLoggedIn) {
-            return "Welcome " + firstName + ", " + lastName + " it is great to see you again.";
+    
+    public String returnLoginStatus(String username, String password) {
+        if (loginUser(username, password)) {
+            return "Welcome " + this.firstName + " " + this.lastName + " it is great to see you again.";
         } else {
             return "Username or password incorrect, please try again.";
         }
     }
-
-    public boolean checkPhone(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    
+    public String getStoredUsername() {
+        return storedUsername;
+    }
+    
+    public String getStoredPassword() {
+        return storedPassword;
+    }
+    
+    public String getStoredCellNumber() {
+        return storedCellNumber;
+    }
+    
+    public String getFirstName() {
+        return firstName;
+    }
+    
+    public String getLastName() {
+        return lastName;
     }
 }
-    
-
